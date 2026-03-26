@@ -38,7 +38,7 @@ public class Circulo { // 1
 }
 
 class CirculoTest{
-    // Prueba 2 (ejercicio 3): con la creación de un objeto (c1) se imprimio correctamente los datos a partir del constructor por defecto
+    // Prueba 2 (ejercicio 3): con la creacion de un objeto (c1) se imprimio correctamente los datos a partir del constructor por defecto
     // asimismo, con el segundo objeto (c2), el cual se creo con el constructor con un valor de 6.55 en el radio, tambien se mostro correctamente
 
     // respuesta de la última pregunta del ejercicio 3: lo que tienen en comun es la creacion de un objeto, pues si no hay objeto no se puede hacer uso de sus metodos
@@ -75,7 +75,7 @@ class CirculoTest{
         System.out.println("Radio: " + c3.getRadio());
         System.out.println("Area: " + c3.getArea());
 
-        // j. this funcion como indicador de un nombre, imaginemos que se usan muchos nombres de variables, y para no confundirlos entre metodos.
+        // j. this funciona como indicador de un nombre, imaginemos que se usan muchos nombres de variables, y para no confundirlos entre metodos.
         // se usa this.var, para hacer unico ese nombre dentro del metodo.
         // por ejemplo:
         // public class Ejem {
