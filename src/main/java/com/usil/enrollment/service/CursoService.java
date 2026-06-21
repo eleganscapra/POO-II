@@ -7,13 +7,11 @@ import com.usil.enrollment.repository.CursoRepository;
 import com.usil.enrollment.repository.SeccionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class CursoService {
-
     @Autowired
     private CursoRepository cursoRepository;
     
@@ -23,12 +21,7 @@ public class CursoService {
     @Autowired
     private MatriculaService matriculaService;
 
-    public List<Curso> obtenerTodosLosCursos() {
-        return cursoRepository.findAll();
-    }
-
     // Obtiene los cursos que un estudiante es elegible para tomar (cumple prerrequisitos).
-
     public List<Curso> obtenerCursosDisponibles(Estudiante estudiante) {
         List<Curso> todosLosCursos = cursoRepository.findAll();
         return todosLosCursos.stream()

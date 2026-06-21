@@ -1,5 +1,4 @@
 package com.usil.enrollment.model;
-
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -8,7 +7,6 @@ import java.util.List;
 
 @Entity
 public class Curso {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,6 +27,14 @@ public class Curso {
             inverseJoinColumns = @JoinColumn(name = "prerrequisito_id")
     )
     private List<Curso> prerrequisitos = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "curso_docentes",
+            joinColumns = @JoinColumn(name = "curso_id"),
+            inverseJoinColumns = @JoinColumn(name = "docente_id")
+    )
+    private List<Docente> docentes = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -68,5 +74,13 @@ public class Curso {
 
     public void setPrerrequisitos(List<Curso> prerrequisitos) {
         this.prerrequisitos = prerrequisitos;
+    }
+
+    public List<Docente> getDocentes() {
+        return docentes;
+    }
+
+    public void setDocentes(List<Docente> docentes) {
+        this.docentes = docentes;
     }
 }

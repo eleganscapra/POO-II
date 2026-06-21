@@ -9,7 +9,6 @@ import com.usil.enrollment.repository.EstudianteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,7 +16,6 @@ import java.util.stream.Stream;
 
 @Service
 public class MatriculaService {
-
     @Autowired
     private MatriculaRepository matriculaRepository;
 
@@ -28,7 +26,6 @@ public class MatriculaService {
     private EstudianteRepository estudianteRepository;
 
     // Verifica si el estudiante cumple todos los prerrequisitos para un curso dado.
-
     public boolean verificarPrerrequisitos(Estudiante estudiante, Curso curso) {
         if (curso.getPrerrequisitos() == null || curso.getPrerrequisitos().isEmpty()) {
             return true;
@@ -43,7 +40,6 @@ public class MatriculaService {
     }
 
     // verifica si hay conflictos de horarios
-
     public boolean verificarCruceHorarios(Estudiante estudiante, Seccion nuevaSeccion) {
         List<Matricula> oficiales = matriculaRepository.findByEstudianteIdAndMatriculado(estudiante.getId(), true);
         List<Matricula> temporales = matriculaRepository.findByEstudianteIdAndMatriculado(estudiante.getId(), false);
@@ -64,7 +60,6 @@ public class MatriculaService {
     }
 
     // pre-matricula a un estudiante en una seccion. Lo agrega al horario temporal (matriculado = false).
-
     @Transactional
     public Matricula preMatricularEstudiante(Long estudianteId, Long seccionId) throws Exception {
         Estudiante estudiante = estudianteRepository.findById(estudianteId)
@@ -125,7 +120,6 @@ public class MatriculaService {
         Seccion seccion = matricula.getSeccion();
         seccion.setInscritos(seccion.getInscritos() - 1);
         seccionRepository.save(seccion);
-        
         matriculaRepository.delete(matricula);
     }
     
@@ -148,9 +142,34 @@ public class MatriculaService {
             Seccion seccion = matricula.getSeccion();
             seccion.setInscritos(seccion.getInscritos() - 1);
             seccionRepository.save(seccion);
-            
             // elminar matriucla
             matriculaRepository.delete(matricula);
         }
+    }
+
+    public void marcarComoCompletado(Long matriculaId, Long estudianteId) {
+        Matricula matricula = matriculaRepository.findById(matriculaId)
+                .orElseThrow(() -> new IllegalArgumentException("Matrícula no encontrada"));
+        
+        if (!matricula.getEstudiante().getId().equals(estudianteId)) {
+            throw new IllegalArgumentException("La matrícula no pertenece a este estudiante");
+        }
+        
+        Estudiante estudiante = matricula.getEstudiante();
+        Curso curso = matricula.getSeccion().getCurso();
+        
+        // Agregar a cursos aprobados si no está
+        if (!estudiante.getCursosAprobados().contains(curso)) {
+            estudiante.getCursosAprobados().add(curso);
+            estudianteRepository.save(estudiante);
+        }
+        
+        // Eliminar la matrícula actual para simular que ya terminó el ciclo
+        matriculaRepository.delete(matricula);
+        
+        // Liberar el cupo en la sección
+        Seccion seccion = matricula.getSeccion();
+        seccion.setInscritos(seccion.getInscritos() - 1);
+        seccionRepository.save(seccion);
     }
 }

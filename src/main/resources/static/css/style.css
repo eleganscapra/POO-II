@@ -1,0 +1,50 @@
+body {
+    background: #f4f6f9;
+}
+.navbar-custom {
+    background: linear-gradient(90deg, #1e3a8a, #2563eb);
+    color: white;
+}
+.navbar-custom .navbar-brand, .navbar-custom .text-white {
+    color: white !important;
+}
+.container-main {
+    margin-top: 30px;
+}
+.glass-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+.card-header-custom {
+    background: linear-gradient(90deg, #2563eb, #3b82f6);
+    color: white;
+    padding: 15px 20px;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+.table-custom th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+.table-custom td {
+    vertical-align: middle;
+}
+.badge-custom {
+    font-size: 0.9rem;
+    padding: 6px 10px;
+}
+.btn-primary-custom {
+    background: #2563eb;
+    color: white;
+    border: none;
+}
+.btn-primary-custom:hover {
+    background: #1d4ed8;
+    color: white;
+}

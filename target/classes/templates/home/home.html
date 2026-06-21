@@ -151,6 +151,70 @@
             font-size:13px;
         }
 
+        /* Modal Styles */
+        .modal {
+            display: none !important; 
+            position: fixed !important; 
+            z-index: 9999 !important; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.5); 
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex !important;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: left;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #0f172a;
+        }
+
+        .student-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+            color: #334155;
+            background: #f8fafc;
+        }
+
+        .student-option:hover {
+            background: #eff6ff;
+            border-color: #3b82f6;
+        }
+
     </style>
 </head>
 
@@ -198,9 +262,9 @@
 
         </p>
 
-        <a th:href="@{/matricula/dashboard}" class="btn student">
+        <button onclick="document.getElementById('modalEstudiantes').classList.add('show')" class="btn student" style="border:none; cursor:pointer; font-size:16px;">
             👨‍🎓 Ingresar como Estudiante
-        </a>
+        </button>
 
         <a th:href="@{/admin/dashboard}" class="btn admin">
             👨‍💼 Ingresar como Administrador
@@ -209,6 +273,38 @@
     </div>
 
 </div>
+
+<!-- Modal -->
+<div id="modalEstudiantes" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="document.getElementById('modalEstudiantes').classList.remove('show')">&times;</span>
+        <h2>Selecciona un Estudiante</h2>
+        <p style="margin-bottom:20px; color:#64748b; font-size:14px;">Elige el estudiante para simular el proceso de matrícula:</p>
+        
+        <form th:action="@{/seleccionar-estudiante}" method="post">
+            <div style="margin-bottom:20px; max-height:300px; overflow-y:auto;">
+                <label th:each="est : ${estudiantes}" class="student-option">
+                    <input type="radio" name="estudianteId" th:value="${est.id}" required style="margin-right:15px; transform:scale(1.2);">
+                    <div>
+                        <strong th:text="${est.nombre}"></strong><br>
+                        <small style="color:#64748b" th:text="${est.codigoAlumno} + ' - ' + ${est.carrera}"></small>
+                    </div>
+                </label>
+            </div>
+            <button type="submit" class="btn student" style="border:none; cursor:pointer; font-size:16px;">
+                Continuar
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.classList.remove('show');
+        }
+    }
+</script>
 
 </body>
 </html>

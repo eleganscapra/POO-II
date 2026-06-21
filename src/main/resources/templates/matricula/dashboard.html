@@ -105,6 +105,7 @@
                         <th>Docente</th>
                         <th>Horario</th>
                         <th>Estado</th>
+                        <th>Acción</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -118,6 +119,12 @@
                         </td>
                         <td>
                             <span class="badge bg-success badge-custom" th:if="${matricula.matriculado}">Oficial</span>
+                        </td>
+                        <td>
+                            <form th:action="@{/matricula/completar}" method="post" class="d-inline">
+                                <input type="hidden" name="matriculaId" th:value="${matricula.id}">
+                                <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-check2-all"></i> Marcar como Completo</button>
+                            </form>
                         </td>
                     </tr>
                 </tbody>

@@ -28,16 +28,19 @@ public class MatriculaController {
     @Autowired
     private MatriculaRepository matriculaRepository;
 
-    // el prototipo simula que haya un estudiante loggeado, no se creo un login porque no estaba dentro
-    // de nuestros abjetivos, aun asi en la base de datos se implementaron dos usuarios
-    private Estudiante getLoggedInEstudiante() {
-        return estudianteRepository.findAll().stream().findFirst() // busca en la tabla de estudiantes
-                .orElseThrow(() -> new RuntimeException("No hay estudiantes registrados en la base de datos."));
-    }       // si no hubiese ninguno, muestra el error por falta de tiempo de respuesta
+    // el prototipo simula que haya un estudiante loggeado, se almacena en la sesión
+    private Estudiante getLoggedInEstudiante(javax.servlet.http.HttpSession session) {
+        Long id = (Long) session.getAttribute("estudianteId");
+        if (id == null) {
+            return estudianteRepository.findAll().stream().findFirst()
+                    .orElseThrow(() -> new RuntimeException("No hay estudiantes registrados en la base de datos."));
+        }
+        return estudianteRepository.findById(id).orElseThrow(() -> new RuntimeException("Estudiante no encontrado."));
+    }
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
-        Estudiante estudiante = getLoggedInEstudiante();
+    public String dashboard(Model model, javax.servlet.http.HttpSession session) {
+        Estudiante estudiante = getLoggedInEstudiante(session);
         model.addAttribute("estudiante", estudiante);
         model.addAttribute("matriculasOficiales", matriculaRepository.findByEstudianteIdAndMatriculado(estudiante.getId(), true));
         model.addAttribute("preMatriculas", matriculaRepository.findByEstudianteIdAndMatriculado(estudiante.getId(), false));
@@ -45,8 +48,8 @@ public class MatriculaController {
     }
 
     @GetMapping("/cursos")
-    public String selectCourse(Model model) {
-        Estudiante estudiante = getLoggedInEstudiante();
+    public String selectCourse(Model model, javax.servlet.http.HttpSession session) {
+        Estudiante estudiante = getLoggedInEstudiante(session);
         model.addAttribute("estudiante", estudiante);
         model.addAttribute("cursosDisponibles", cursoService.obtenerCursosDisponibles(estudiante));
         return "matricula/course-selection";
@@ -71,8 +74,8 @@ public class MatriculaController {
     }
 
     @PostMapping("/agregar")
-    public String confirmEnrollment(@RequestParam Long seccionId, RedirectAttributes redirectAttributes) {
-        Estudiante estudiante = getLoggedInEstudiante();
+    public String confirmEnrollment(@RequestParam Long seccionId, RedirectAttributes redirectAttributes, javax.servlet.http.HttpSession session) {
+        Estudiante estudiante = getLoggedInEstudiante(session);
         try {
             matriculaService.preMatricularEstudiante(estudiante.getId(), seccionId);
             redirectAttributes.addFlashAttribute("successMessage", "Curso agregado al horario temporal con éxito.");
@@ -83,8 +86,8 @@ public class MatriculaController {
     }
     
     @PostMapping("/eliminar")
-    public String deleteEnrollment(@RequestParam Long matriculaId, RedirectAttributes redirectAttributes) {
-        Estudiante estudiante = getLoggedInEstudiante();
+    public String deleteEnrollment(@RequestParam Long matriculaId, RedirectAttributes redirectAttributes, javax.servlet.http.HttpSession session) {
+        Estudiante estudiante = getLoggedInEstudiante(session);
         try {
             matriculaService.eliminarMatriculaTemporal(matriculaId, estudiante.getId());
             redirectAttributes.addFlashAttribute("successMessage", "Curso eliminado del horario temporal.");
@@ -95,21 +98,33 @@ public class MatriculaController {
     }
     
     @PostMapping("/emitir")
-    public String finalizeEnrollments(RedirectAttributes redirectAttributes) {
-        Estudiante estudiante = getLoggedInEstudiante();
+    public String finalizeEnrollments(RedirectAttributes redirectAttributes, javax.servlet.http.HttpSession session) {
+        Estudiante estudiante = getLoggedInEstudiante(session);
         matriculaService.emitirMatriculas(estudiante.getId());
         redirectAttributes.addFlashAttribute("successMessage", "¡Matrícula confirmada y emitida exitosamente!");
         return "redirect:/matricula/dashboard";
     }
 
     @PostMapping("/retiro-total")
-    public String withdrawTotal(RedirectAttributes redirectAttributes) {
-        Estudiante estudiante = getLoggedInEstudiante();
+    public String withdrawTotal(RedirectAttributes redirectAttributes, javax.servlet.http.HttpSession session) {
+        Estudiante estudiante = getLoggedInEstudiante(session);
         try {
             matriculaService.eliminarMatriculaCompleta(estudiante.getId());
             redirectAttributes.addFlashAttribute("successMessage", "Se ha cancelado y eliminado exitosamente toda su matrícula del ciclo. Sus vacantes han sido liberadas.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar el retiro total: " + e.getMessage());
+        }
+        return "redirect:/matricula/dashboard";
+    }
+
+    @PostMapping("/completar")
+    public String completeCourse(@RequestParam Long matriculaId, RedirectAttributes redirectAttributes, javax.servlet.http.HttpSession session) {
+        Estudiante estudiante = getLoggedInEstudiante(session);
+        try {
+            matriculaService.marcarComoCompletado(matriculaId, estudiante.getId());
+            redirectAttributes.addFlashAttribute("successMessage", "Curso marcado como completado y agregado a tu historial de cursos aprobados.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al completar curso: " + e.getMessage());
         }
         return "redirect:/matricula/dashboard";
     }

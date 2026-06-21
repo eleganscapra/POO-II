@@ -2,8 +2,33 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Administrador</title>
-
-    <link rel="stylesheet" th:href="@{/style/style.css}">
+    <link rel="stylesheet" th:href="@{/style/style.css?v=3}">
+    <style>
+        .modal {
+            display: none !important;
+            position: fixed !important;
+            z-index: 9999 !important;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal.show {
+            display: block !important;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            position: relative;
+        }
+    </style>
 </head>
 <body>
 
@@ -13,69 +38,400 @@
 
 <div class="container">
 
-    <div class="card">
-
-        <h2>Crear Nuevo Curso</h2>
-
-        <div th:if="${error}" class="error-box">
-            <p th:text="${error}"></p>
-        </div>
-
-        <form th:action="@{/admin/guardar}" method="post">
-
-            <label>Código</label>
-            <input type="text"
-                   name="codigo"
-                   required>
-
-            <label>Nombre</label>
-            <input type="text"
-                   name="nombre"
-                   minlength="3"
-                   required>
-
-            <label>Créditos</label>
-            <input type="number"
-                   name="creditos"
-                   min="1"
-                   max="6"
-                   required>
-
-            <button type="submit">
-                Crear Curso
-            </button>
-
-        </form>
-
+    <div th:if="${error}" class="error-box">
+        <p th:text="${error}"></p>
     </div>
 
+    <!-- Tarjeta Docentes -->
     <div class="card">
-
-        <h2>Cursos Registrados</h2>
-
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Docentes Registrados</h2>
+            <button onclick="abrirModal('modalCrearDocente')">Crear Nuevo Docente</button>
+        </div>
         <table>
+            <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Departamento</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="docente : ${docentes}">
+                <td th:text="${docente.nombre}"></td>
+                <td th:text="${docente.departamento}"></td>
+                <td>
+                    <button type="button" class="btn-warning"
+                            th:data-id="${docente.id}"
+                            th:data-nombre="${docente.nombre}"
+                            th:data-departamento="${docente.departamento}"
+                            onclick="abrirModalEditarDocente(this)">Editar</button>
+                    <form th:action="@{/admin/docente/eliminar}" method="post" style="display:inline;">
+                        <input type="hidden" name="id" th:value="${docente.id}"/>
+                        <button type="submit" class="btn-danger" onclick="return confirm('¿Seguro que desea eliminar este docente?');">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 
+    <!-- Tarjeta Cursos -->
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Cursos Registrados</h2>
+            <button onclick="abrirModal('modalCrear')">Crear Nuevo Curso</button>
+        </div>
+        <table>
             <thead>
             <tr>
                 <th>Código</th>
                 <th>Nombre</th>
                 <th>Créditos</th>
+                <th>Acciones</th>
             </tr>
             </thead>
-
             <tbody>
             <tr th:each="curso : ${cursos}">
                 <td th:text="${curso.codigo}"></td>
                 <td th:text="${curso.nombre}"></td>
                 <td th:text="${curso.creditos}"></td>
+                <td>
+                    <div th:id="'prereq-' + ${curso.id}" style="display:none;">
+                        <span th:each="p : ${curso.prerrequisitos}" th:text="${p.id}"></span>
+                    </div>
+                    <div th:id="'docentes-' + ${curso.id}" style="display:none;">
+                        <span th:each="d : ${curso.docentes}" th:text="${d.id}"></span>
+                    </div>
+                    <button type="button" class="btn-warning"
+                            th:data-id="${curso.id}"
+                            th:data-codigo="${curso.codigo}"
+                            th:data-nombre="${curso.nombre}"
+                            th:data-creditos="${curso.creditos}"
+                            onclick="abrirModalEditar(this)">Editar</button>
+                    <form th:action="@{/admin/eliminar}" method="post" style="display:inline;">
+                        <input type="hidden" name="id" th:value="${curso.id}"/>
+                        <button type="submit" class="btn-danger" onclick="return confirm('¿Seguro que desea eliminar este curso?');">Eliminar</button>
+                    </form>
+                </td>
             </tr>
             </tbody>
-
         </table>
+    </div>
 
+    <!-- Tarjeta Secciones -->
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Gestión de Secciones</h2>
+            <button onclick="abrirModal('modalCrearSeccion')">Crear Nueva Sección</button>
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th>Curso</th>
+                <th>Docente</th>
+                <th>Bloque</th>
+                <th>Día</th>
+                <th>Horario</th>
+                <th>Cupo</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="sec : ${secciones}">
+                <td th:text="${sec.curso.codigo}"></td>
+                <td th:text="${sec.docente.nombre}"></td>
+                <td th:text="${sec.codigoBloque}"></td>
+                <td th:text="${sec.diaSemana}"></td>
+                <td th:text="${sec.horaInicio} + ' - ' + ${sec.horaFin}"></td>
+                <td th:text="${sec.inscritos} + '/' + ${sec.capacidad}"></td>
+                <td>
+                    <button type="button" class="btn-warning"
+                            th:data-id="${sec.id}"
+                            th:data-cursoid="${sec.curso.id}"
+                            th:data-docenteid="${sec.docente.id}"
+                            th:data-bloque="${sec.codigoBloque}"
+                            th:data-dia="${sec.diaSemana}"
+                            th:data-inicio="${sec.horaInicio}"
+                            th:data-fin="${sec.horaFin}"
+                            th:data-cap="${sec.capacidad}"
+                            onclick="abrirModalEditarSeccion(this)">Editar</button>
+                    <form th:action="@{/admin/seccion/eliminar}" method="post" style="display:inline;">
+                        <input type="hidden" name="id" th:value="${sec.id}"/>
+                        <button type="submit" class="btn-danger" onclick="return confirm('¿Seguro que desea eliminar esta sección?');">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
     </div>
 
 </div>
 
+<!-- Modal Crear Docente -->
+<div id="modalCrearDocente" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="cerrarModal('modalCrearDocente')">&times;</span>
+        <h2>Crear Nuevo Docente</h2>
+        <form th:action="@{/admin/docente/guardar}" method="post">
+            <label>Nombre</label>
+            <input type="text" name="nombre" required>
+            <label>Departamento</label>
+            <input type="text" name="departamento" required>
+            <button type="submit" style="margin-top:20px;">Crear Docente</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Editar Docente -->
+<div id="modalEditarDocente" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="cerrarModal('modalEditarDocente')">&times;</span>
+        <h2>Editar Docente</h2>
+        <form th:action="@{/admin/docente/editar}" method="post">
+            <input type="hidden" name="id" id="edit-docente-id">
+            <label>Nombre</label>
+            <input type="text" name="nombre" id="edit-docente-nombre" required>
+            <label>Departamento</label>
+            <input type="text" name="departamento" id="edit-docente-departamento" required>
+            <button type="submit" style="margin-top:20px;">Guardar Cambios</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Crear Curso -->
+<div id="modalCrear" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="cerrarModal('modalCrear')">&times;</span>
+        <h2>Crear Nuevo Curso</h2>
+        <form th:action="@{/admin/guardar}" method="post">
+            <label>Código</label>
+            <input type="text" name="codigo" required>
+
+            <label>Nombre</label>
+            <input type="text" name="nombre" minlength="3" required>
+
+            <label>Créditos</label>
+            <input type="number" name="creditos" min="1" max="6" required>
+
+            <div id="panelPrerrequisitosCrear" class="prerrequisitos-panel" style="margin-top:15px; display:block;">
+                <p style="margin-top:0; font-weight:bold;">Seleccione los prerrequisitos (Ctrl + Click para seleccionar varios):</p>
+                <select name="prerrequisitosIds" id="crear-prerrequisitos" multiple style="width:100%; height:120px; padding:5px; border-radius:6px; border:1px solid #ccc; font-family:inherit;">
+                    <option th:each="c : ${cursos}" th:value="${c.id}" th:text="${c.codigo} + ' - ' + ${c.nombre}"></option>
+                </select>
+            </div>
+
+            <div id="panelDocentesCrear" class="prerrequisitos-panel" style="margin-top:15px; display:block;">
+                <p style="margin-top:0; font-weight:bold;">Seleccione los docentes (Ctrl + Click para seleccionar varios):</p>
+                <select name="docenteIds" id="crear-docentes" multiple style="width:100%; height:120px; padding:5px; border-radius:6px; border:1px solid #ccc; font-family:inherit;">
+                    <option th:each="d : ${docentes}" th:value="${d.id}" th:text="${d.nombre} + ' (' + ${d.departamento} + ')'"></option>
+                </select>
+            </div>
+
+            <button type="submit" style="margin-top:20px;">Crear Curso</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Editar Curso -->
+<div id="modalEditar" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="cerrarModal('modalEditar')">&times;</span>
+        <h2>Editar Curso</h2>
+        <form th:action="@{/admin/editar}" method="post">
+            <input type="hidden" name="id" id="edit-id">
+            
+            <label>Código</label>
+            <input type="text" name="codigo" id="edit-codigo" required>
+
+            <label>Nombre</label>
+            <input type="text" name="nombre" id="edit-nombre" minlength="3" required>
+
+            <label>Créditos</label>
+            <input type="number" name="creditos" id="edit-creditos" min="1" max="6" required>
+
+            <div id="panelPrerrequisitosEditar" class="prerrequisitos-panel" style="margin-top:15px; display:block;">
+                <p style="margin-top:0; font-weight:bold;">Seleccione los prerrequisitos (Ctrl + Click para seleccionar varios):</p>
+                <select name="prerrequisitosIds" id="edit-prerrequisitos" multiple style="width:100%; height:120px; padding:5px; border-radius:6px; border:1px solid #ccc; font-family:inherit;">
+                    <option th:each="c : ${cursos}" th:value="${c.id}" th:text="${c.codigo} + ' - ' + ${c.nombre}"></option>
+                </select>
+            </div>
+
+            <div id="panelDocentesEditar" class="prerrequisitos-panel" style="margin-top:15px; display:block;">
+                <p style="margin-top:0; font-weight:bold;">Seleccione los docentes (Ctrl + Click para seleccionar varios):</p>
+                <select name="docenteIds" id="edit-docentes" multiple style="width:100%; height:120px; padding:5px; border-radius:6px; border:1px solid #ccc; font-family:inherit;">
+                    <option th:each="d : ${docentes}" th:value="${d.id}" th:text="${d.nombre} + ' (' + ${d.departamento} + ')'"></option>
+                </select>
+            </div>
+
+            <button type="submit" style="margin-top:20px;">Guardar Cambios</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Crear Seccion -->
+<div id="modalCrearSeccion" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="cerrarModal('modalCrearSeccion')">&times;</span>
+        <h2>Crear Nueva Sección</h2>
+        <form th:action="@{/admin/seccion/guardar}" method="post">
+            <label>Curso</label>
+            <select name="cursoId" required style="width:100%; padding:10px; margin-bottom:15px;">
+                <option th:each="c : ${cursos}" th:value="${c.id}" th:text="${c.codigo} + ' - ' + ${c.nombre}"></option>
+            </select>
+
+            <label>Docente</label>
+            <select name="docenteId" required style="width:100%; padding:10px; margin-bottom:15px;">
+                <option th:each="d : ${docentes}" th:value="${d.id}" th:text="${d.nombre}"></option>
+            </select>
+
+            <label>Código Bloque</label>
+            <input type="text" name="codigoBloque" required>
+
+            <label>Día de la Semana</label>
+            <select name="diaSemana" required style="width:100%; padding:10px; margin-bottom:15px;">
+                <option value="Lunes">Lunes</option>
+                <option value="Martes">Martes</option>
+                <option value="Miércoles">Miércoles</option>
+                <option value="Jueves">Jueves</option>
+                <option value="Viernes">Viernes</option>
+                <option value="Sábado">Sábado</option>
+            </select>
+
+            <label>Hora Inicio</label>
+            <input type="time" name="horaInicio" required>
+
+            <label>Hora Fin</label>
+            <input type="time" name="horaFin" required>
+
+            <label>Capacidad</label>
+            <input type="number" name="capacidad" min="1" required>
+
+            <button type="submit" style="margin-top:20px;">Crear Sección</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Editar Seccion -->
+<div id="modalEditarSeccion" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="cerrarModal('modalEditarSeccion')">&times;</span>
+        <h2>Editar Sección</h2>
+        <form th:action="@{/admin/seccion/editar}" method="post">
+            <input type="hidden" name="id" id="edit-sec-id">
+
+            <label>Curso</label>
+            <select name="cursoId" id="edit-sec-curso" required style="width:100%; padding:10px; margin-bottom:15px;">
+                <option th:each="c : ${cursos}" th:value="${c.id}" th:text="${c.codigo} + ' - ' + ${c.nombre}"></option>
+            </select>
+
+            <label>Docente</label>
+            <select name="docenteId" id="edit-sec-docente" required style="width:100%; padding:10px; margin-bottom:15px;">
+                <option th:each="d : ${docentes}" th:value="${d.id}" th:text="${d.nombre}"></option>
+            </select>
+
+            <label>Código Bloque</label>
+            <input type="text" name="codigoBloque" id="edit-sec-bloque" required>
+
+            <label>Día de la Semana</label>
+            <select name="diaSemana" id="edit-sec-dia" required style="width:100%; padding:10px; margin-bottom:15px;">
+                <option value="Lunes">Lunes</option>
+                <option value="Martes">Martes</option>
+                <option value="Miércoles">Miércoles</option>
+                <option value="Jueves">Jueves</option>
+                <option value="Viernes">Viernes</option>
+                <option value="Sábado">Sábado</option>
+            </select>
+
+            <label>Hora Inicio</label>
+            <input type="time" name="horaInicio" id="edit-sec-inicio" required>
+
+            <label>Hora Fin</label>
+            <input type="time" name="horaFin" id="edit-sec-fin" required>
+
+            <label>Capacidad</label>
+            <input type="number" name="capacidad" id="edit-sec-cap" min="1" required>
+
+            <button type="submit" style="margin-top:20px;">Guardar Cambios</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function abrirModal(id) {
+        document.getElementById(id).classList.add('show');
+    }
+
+    function cerrarModal(id) {
+        document.getElementById(id).classList.remove('show');
+    }
+
+    function abrirModalEditarDocente(btn) {
+        document.getElementById('edit-docente-id').value = btn.getAttribute('data-id');
+        document.getElementById('edit-docente-nombre').value = btn.getAttribute('data-nombre');
+        document.getElementById('edit-docente-departamento').value = btn.getAttribute('data-departamento');
+        abrirModal('modalEditarDocente');
+    }
+
+    function abrirModalEditar(btn) {
+        const id = btn.getAttribute('data-id');
+        document.getElementById('edit-id').value = id;
+        document.getElementById('edit-codigo').value = btn.getAttribute('data-codigo');
+        document.getElementById('edit-nombre').value = btn.getAttribute('data-nombre');
+        document.getElementById('edit-creditos').value = btn.getAttribute('data-creditos');
+
+        // Extract IDs from hidden spans
+        const prereqDiv = document.getElementById('prereq-' + id);
+        const prerrequisitosIds = prereqDiv ? Array.from(prereqDiv.children).map(span => Number(span.innerText)) : [];
+        
+        const docentesDiv = document.getElementById('docentes-' + id);
+        const docentesIds = docentesDiv ? Array.from(docentesDiv.children).map(span => Number(span.innerText)) : [];
+
+        // Set select options for prerequisites
+        const selectPrereq = document.getElementById('edit-prerrequisitos');
+        for (let option of selectPrereq.options) {
+            const optVal = Number(option.value);
+            option.selected = prerrequisitosIds.includes(optVal);
+            
+            // Un curso no puede ser prerrequisito de sí mismo
+            if (optVal === Number(id)) {
+                option.style.display = 'none';
+                option.selected = false;
+            } else {
+                option.style.display = 'block';
+            }
+        }
+
+        // Set select options for docentes
+        const selectDocentes = document.getElementById('edit-docentes');
+        for (let option of selectDocentes.options) {
+            option.selected = docentesIds.includes(Number(option.value));
+        }
+
+        // Checkboxes removed, panels are always visible
+
+        abrirModal('modalEditar');
+    }
+
+    function abrirModalEditarSeccion(btn) {
+        document.getElementById('edit-sec-id').value = btn.getAttribute('data-id');
+        document.getElementById('edit-sec-curso').value = btn.getAttribute('data-cursoid');
+        document.getElementById('edit-sec-docente').value = btn.getAttribute('data-docenteid');
+        document.getElementById('edit-sec-bloque').value = btn.getAttribute('data-bloque');
+        document.getElementById('edit-sec-dia').value = btn.getAttribute('data-dia');
+        document.getElementById('edit-sec-inicio').value = btn.getAttribute('data-inicio');
+        document.getElementById('edit-sec-fin').value = btn.getAttribute('data-fin');
+        document.getElementById('edit-sec-cap').value = btn.getAttribute('data-cap');
+        abrirModal('modalEditarSeccion');
+    }
+
+    // Toggle function removed
+
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.classList.remove('show');
+        }
+    }
+</script>
 </body>
 </html>
