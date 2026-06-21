@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Confirmación</title>
+</head>
+<body>
+
+<h2 th:text="${mensaje}"></h2>
+
+<p>¿Desea continuar en modo administrador?</p>
+
+<a th:href="@{/admin/dashboard}">
+    <button>Sí, continuar</button>
+</a>
+
+<a th:href="@{/}">
+    <button>No, volver al inicio</button>
+</a>
+
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de Matrícula</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Poppins',sans-serif;
+        }
+
+        body{
+            min-height:100vh;
+
+            background:
+            linear-gradient(
+            135deg,
+            #0f172a 0%,
+            #1e3a8a 50%,
+            #2563eb 100%
+            );
+
+            display:flex;
+            justify-content:center;
+            align-items:center;
+        }
+
+        .container{
+            width:900px;
+            max-width:95%;
+
+            background:white;
+
+            border-radius:25px;
+
+            overflow:hidden;
+
+            display:flex;
+
+            box-shadow:
+            0 25px 60px rgba(0,0,0,.25);
+        }
+
+        .left{
+            flex:1;
+
+            background:
+            linear-gradient(
+            180deg,
+            #0f172a,
+            #1e293b
+            );
+
+            color:white;
+
+            padding:60px 40px;
+
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+        }
+
+        .left h1{
+            font-size:40px;
+            margin-bottom:15px;
+        }
+
+        .left p{
+            font-size:16px;
+            line-height:1.8;
+            color:#cbd5e1;
+        }
+
+        .right{
+            flex:1;
+            padding:60px 50px;
+
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+        }
+
+        .logo{
+            text-align:center;
+            font-size:80px;
+            margin-bottom:20px;
+        }
+
+        .title{
+            text-align:center;
+            color:#0f172a;
+            margin-bottom:10px;
+            font-size:30px;
+        }
+
+        .subtitle{
+            text-align:center;
+            color:#64748b;
+            margin-bottom:40px;
+        }
+
+        .btn{
+            width:100%;
+            display:block;
+
+            text-decoration:none;
+
+            text-align:center;
+
+            padding:18px;
+
+            border-radius:14px;
+
+            font-weight:600;
+
+            margin-bottom:20px;
+
+            transition:.3s;
+        }
+
+        .student{
+            background:#2563eb;
+            color:white;
+        }
+
+        .student:hover{
+            background:#1d4ed8;
+            transform:translateY(-3px);
+        }
+
+        .admin{
+            background:#0f172a;
+            color:white;
+        }
+
+        .admin:hover{
+            background:#020617;
+            transform:translateY(-3px);
+        }
+
+        .footer{
+            text-align:center;
+            margin-top:20px;
+            color:#94a3b8;
+            font-size:13px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="left">
+
+        <h1>PROYECTO FINAL POO2</h1>
+
+        <p>
+            Grupo 4
+        </p>
+
+        <p>
+            - Tejada Rivera, Erick Henry
+        </p>
+
+        <p>
+            - Agramonte Sanchez, José Fernando
+        </p>
+
+        <p>
+            - Mitma Zeballos, Shantall Natzumy
+        </p>
+
+        <p>
+            - Bendezú Castillo, Marco Antonio
+        </p>
+
+    </div>
+
+    <div class="right">
+
+        <div class="logo">
+            🎓
+        </div>
+
+        <h2 class="title">
+            Sistema de Matrícula
+        </h2>
+
+        <p class="subtitle">
+
+        </p>
+
+        <a th:href="@{/matricula/dashboard}" class="btn student">
+            👨‍🎓 Ingresar como Estudiante
+        </a>
+
+        <a th:href="@{/admin/dashboard}" class="btn admin">
+            👨‍💼 Ingresar como Administrador
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>
+```

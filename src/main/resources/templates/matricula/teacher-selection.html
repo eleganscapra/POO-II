@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selección de Docente - USIL</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/"><i class="bi bi-book-half"></i> USIL Matrícula</a>
+    </div>
+</nav>
+
+<div class="container container-main">
+    
+    <div class="step-indicator">
+        <div class="step">1. Curso</div>
+        <div class="step active">2. Docente</div>
+        <div class="step">3. Horario</div>
+    </div>
+
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold">Selecciona un Docente</h2>
+            <p class="text-muted">Curso: <span class="fw-semibold" th:text="${curso.nombre + ' (' + curso.codigo + ')'}"></span></p>
+        </div>
+        <a href="/matricula/cursos" class="btn btn-outline-secondary rounded-pill">Atrás</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4" th:each="docente : ${docentes}">
+            <div class="glass-card h-100 p-4 text-center">
+                <div class="mb-3">
+                    <i class="bi bi-person-bounding-box" style="font-size: 3rem; color: var(--accent-color);"></i>
+                </div>
+                <h4 class="fw-bold" th:text="${docente.nombre}"></h4>
+                <p class="text-muted small" th:text="${docente.departamento}"></p>
+                
+                <a th:href="@{/matricula/horarios(cursoId=${curso.id}, docenteId=${docente.id})}" class="btn btn-primary-custom w-100 mt-3">
+                    Ver Horarios <i class="bi bi-calendar-week"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div th:if="${docentes.empty}" class="col-12">
+            <div class="alert alert-warning">
+                No hay docentes programados para este curso.
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

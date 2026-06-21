@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USIL Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/"><i class="bi bi-book-half"></i> USIL Matrícula</a>
+        <div class="d-flex text-white align-items-center">
+            <span class="me-3"><i class="bi bi-person-circle"></i> <span th:text="${estudiante.nombre}"></span></span>
+            <span class="badge bg-primary" th:text="${estudiante.codigoAlumno}"></span>
+        </div>
+    </div>
+</nav>
+
+<div class="container container-main">
+    
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill"></i> <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold">Resumen Académico</h2>
+            <p class="text-muted">Carrera: <span th:text="${estudiante.carrera}" class="fw-semibold"></span></p>
+        </div>
+        <div class="col-md-4 text-end d-flex justify-content-end align-items-center gap-2">
+            <form th:if="${!preMatriculas.empty or !matriculasOficiales.empty}" th:action="@{/matricula/retiro-total}" method="post" onsubmit="return confirm('¿Estás SEGURO de que deseas eliminar TODA tu matrícula? Esta acción liberará tus vacantes y no se puede deshacer.');">
+                <button type="submit" class="btn btn-danger shadow"><i class="bi bi-x-octagon"></i> Retiro Total</button>
+            </form>
+            <a href="/matricula/cursos" class="btn btn-primary-custom shadow"><i class="bi bi-plus-circle"></i> Agregar Curso</a>
+        </div>
+    </div>
+
+    <!-- PRE_ENROLLED COURSES -->
+    <div class="glass-card mb-4" th:if="${!preMatriculas.empty}">
+        <div class="card-header-custom" style="background: linear-gradient(90deg, #f59e0b, #d97706);">
+            <i class="bi bi-clock-history"></i> Cursos en Horario Temporal (No Confirmados)
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Bloque</th>
+                        <th>Curso</th>
+                        <th>Docente</th>
+                        <th>Horario</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="matricula : ${preMatriculas}">
+                        <td class="ps-4 fw-semibold"><span class="badge bg-secondary badge-custom" th:text="${matricula.seccion.codigoBloque}"></span></td>
+                        <td th:text="${matricula.seccion.curso.nombre}"></td>
+                        <td th:text="${matricula.seccion.docente.nombre}"></td>
+                        <td>
+                            <span th:text="${matricula.seccion.diaSemana}"></span><br>
+                            <small class="text-muted" th:text="${matricula.seccion.horaInicio + ' - ' + matricula.seccion.horaFin}"></small>
+                        </td>
+                        <td>
+                            <form th:action="@{/matricula/eliminar}" method="post" class="d-inline">
+                                <input type="hidden" name="matriculaId" th:value="${matricula.id}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill"><i class="bi bi-trash"></i> Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-transparent p-3 text-end">
+            <form th:action="@{/matricula/emitir}" method="post">
+                <button type="submit" class="btn btn-success shadow-sm fw-bold"><i class="bi bi-check-circle-fill"></i> Emitir Matrícula</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ENROLLED COURSES -->
+    <div class="glass-card">
+        <div class="card-header-custom">
+            <i class="bi bi-journal-check"></i> Mis Cursos Matriculados Oficialmente
+        </div>
+        <div class="card-body p-0">
+            <div th:if="${matriculasOficiales.empty}" class="p-5 text-center text-muted">
+                <i class="bi bi-inbox fs-1"></i>
+                <p class="mt-2">No has emitido tu matrícula final aún.</p>
+            </div>
+            
+            <table th:unless="${matriculasOficiales.empty}" class="table table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Bloque</th>
+                        <th>Curso</th>
+                        <th>Docente</th>
+                        <th>Horario</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="matricula : ${matriculasOficiales}">
+                        <td class="ps-4 fw-semibold"><span class="badge bg-secondary badge-custom" th:text="${matricula.seccion.codigoBloque}"></span></td>
+                        <td th:text="${matricula.seccion.curso.nombre}"></td>
+                        <td th:text="${matricula.seccion.docente.nombre}"></td>
+                        <td>
+                            <span th:text="${matricula.seccion.diaSemana}"></span><br>
+                            <small class="text-muted" th:text="${matricula.seccion.horaInicio + ' - ' + matricula.seccion.horaFin}"></small>
+                        </td>
+                        <td>
+                            <span class="badge bg-success badge-custom" th:if="${matricula.matriculado}">Oficial</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
